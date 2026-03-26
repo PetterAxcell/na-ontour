@@ -5,28 +5,62 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#00A86B"
+      "backgroundColor": "#1A5F2A"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.naontour.app"
+      "bundleIdentifier": "com.naontour.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "NA-ONTOUR necesita acceso a la cámara para subir fotos.",
+        "NSPhotoLibraryUsageDescription": "NA-ONTOUR necesita acceso a tu galería para subir fotos."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#00A86B"
+        "backgroundColor": "#1A5F2A"
       },
-      "package": "com.naontour.app"
+      "package": "com.naontour.app",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "NA-ONTOUR necesita acceso a la cámara."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "NA-ONTOUR necesita acceso a tus fotos."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      },
+      "firebaseApiKey": "your-api-key",
+      "firebaseAuthDomain": "your-project.firebaseapp.com",
+      "firebaseProjectId": "your-project-id",
+      "firebaseStorageBucket": "your-project.appspot.com",
+      "firebaseMessagingSenderId": "123456789",
+      "firebaseAppId": "1:123456789:android:abc123"
     }
   }
 }

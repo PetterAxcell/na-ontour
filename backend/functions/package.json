@@ -1,5 +1,5 @@
 {
-  "name": "na-ontour-backend",
+  "name": "na-ontour-functions",
   "description": "Firebase Cloud Functions for NA-ONTOUR",
   "scripts": {
     "serve": "firebase emulators:start --only functions",
