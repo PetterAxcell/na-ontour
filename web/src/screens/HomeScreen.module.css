@@ -1,0 +1,169 @@
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.header {
+  margin-bottom: var(--space-6);
+}
+
+.header h1 {
+  font-size: 1.75rem;
+  color: var(--color-text);
+}
+
+.greeting {
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+.loading {
+  text-align: center;
+  padding: var(--space-12);
+  color: var(--color-text-secondary);
+}
+
+.createPost {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-surface);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-6);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.postInput {
+  flex: 1;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  padding: var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+}
+
+.postInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.empty {
+  text-align: center;
+  padding: var(--space-12);
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.empty h3 {
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.empty p {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.post {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.postHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.postAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.postMeta {
+  flex: 1;
+}
+
+.postAuthor {
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: block;
+}
+
+.postTime {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.moreBtn {
+  color: var(--color-text-secondary);
+  padding: var(--space-1);
+}
+
+.postContent {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  margin-bottom: var(--space-3);
+}
+
+.postPhotos {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.postPhoto {
+  width: 100%;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.postActions {
+  display: flex;
+  gap: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.actionBtn:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.actionBtn.liked {
+  color: var(--color-accent);
+}
