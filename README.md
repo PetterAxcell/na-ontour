@@ -1,308 +1,232 @@
-# NA-ONTOUR 🌍⚽
+# NA-ONTOUR ⚽✈️
 
-> **Tu compañero de aventuras futboleras. Compite viajando, conecta con clubes, y revive cada experiencia.**
-
-NA-ONTOUR es una aplicación social diseñada para los verdaderos aficionados del fútbol. Crea viajes a partidos, documenta tus experiencias, conecta con otros fans y vive experiencias exclusivas de tus clubes favoritos.
+> **Compite viajando. Recuerda experiencias. Conecta clubes y aficionados.**
 
 ---
 
-## 🚀 Visión
+## 🎯 Visión
 
-NA-ONTOUR nació de una verdad simple: **el fútbol se vive fuera del estadio tanto como dentro**. Cada viaje a un partido es una historia. Cada experiencia merece ser recordada. Cada club tiene una comunidad de locos跟你一样 que merecen estar conectados.
+**NA-ONTOUR** es la plataforma que convierte cada desplazamiento de un aficionado al fútbol en una aventura memorable. No es solo otra app de resultados o fichajes — es tu **compañera de viaje deportivo**.
 
-La app es tu:
+Imagina que tu equipo juega en una ciudad que nunca has visitado. NA-ONTOUR te ayuda a encontrar:
+- 🎫 Cómo conseguir entradas para el partido
+- 🏨 Alojamientos cerca del estadio
+- 🍽️ Los mejores sitios para comer antes del partido
+- 📸 Lugares icónicos para visitar mientras estás ahí
+- 👥 Otros aficionados con los que compartir la experiencia
 
-- 📱 **Diario de viajes** — Registra cada partido visitado
-- 📸 **Álbum de memorias** — Fotos, momentos, emociones
-- 🤝 **Red social** — Conecta con aficionados de tu club y de otros
-- 🎫 **Portal de experiencias** — Accede a contenido y ventajas exclusivas
+**NA-ONTOUR transforma un simple partido en un viaje inolvidable.**
+
+---
+
+## ✨ Funcionalidades
+
+### 1. 📅 Gestión de Viajes Deportivos
+- Crear y gestionar viajes alrededor de partidos
+- Itinerarios personalizados día a día
+- Invitar a compañeros de viaje
+- Historial completo de viajes
+
+### 2. 📸 Registro de Experiencias
+- Diario de viaje con fotos, notas y ubicación
+- Experiencias vinculadas a clubes específicos
+- Experiencias personales/memories
+- Tags y categorización
+
+### 3. 🏟️ Conexión con Clubes
+- Perfiles de clubes con estadios y datos
+- Experiencias exclusivas por club
+- Faniq Score: tu nivel de fidelidad
+- Badges y logros
+
+### 4. 👥 Red Social de Aficionados
+- Perfil de aficionado personalizable
+- Social feed con actividad de usuarios
+- Follow/unfollow entre usuarios
+- Comentarios y likes en experiencias
 
 ---
 
 ## 🏗️ Arquitectura
 
-```
-na-ontour/
-├── web/                    # React app (Vite + TypeScript)
-├── mobile/                 # React Native + Expo
-├── backend/                # Firebase Cloud Functions
-├── docs/                   # Documentación técnica y de producto
-└── README.md
-```
-
 ### Stack Tecnológico
 
-| Capa | Tecnología |
-|------|-------------|
-| **Web Frontend** | React 18 + TypeScript + Vite |
-| **Mobile Frontend** | React Native + Expo SDK 52 |
-| **Backend** | Firebase (Cloud Functions v2) |
-| **Base de datos** | Firestore |
-| **Auth** | Firebase Auth (Email + Google) |
-| **Storage** | Firebase Storage |
-| **Hosting Web** | Firebase Hosting |
-| **Analytics** | Firebase Analytics |
+**Web (React)**
+```
+web/
+├── public/
+├── src/
+│   ├── components/       # Componentes reutilizables
+│   ├── screens/          # Páginas/Vistas
+│   ├── context/          # React Context (Auth, Theme)
+│   ├── services/         # Firebase, API calls
+│   └── styles/           # CSS/Estilos
+├── package.json
+└── firebase.json
+```
 
-### Modelo de Datos (Firestore)
+**Mobile (React Native + Expo)**
+```
+mobile/
+├── app.json
+├── src/
+│   ├── components/       # Componentes reutilizables
+│   ├── screens/          # Pantallas
+│   ├── context/          # React Context
+│   ├── services/         # Firebase, API
+│   └── hooks/            # Custom hooks
+├── package.json
+└── App.tsx
+```
+
+**Backend (Firebase Functions)**
+```
+backend/
+└── functions/
+    ├── src/
+    │   ├── index.ts
+    │   └── ... (Cloud Functions)
+    └── package.json
+```
+
+---
+
+## 🔥 Firebase Setup
+
+### Servicios utilizados:
+- **Firebase Auth**: Autenticación (Google将来)
+- **Firestore**: Base de datos NoSQL
+- **Firebase Storage**: Almacenamiento de imágenes
+- **Firebase Hosting**: Hosting para web
+- **Expo**: Despliegue móvil
+
+### Estructura Firestore:
 
 ```
 /users/{userId}
-  - name: string
-  - email: string
-  - photoURL: string | null
-  - clubs: string[]           // clubIds
-  - trips: string[]           // tripIds
-  - experiences: string[]     // experienceIds
-  - following: string[]       // userIds
-  - followers: string[]       // userIds
-  - createdAt: timestamp
-  - bio: string
+  - email, username, displayName, avatarUrl, bio
+  - faniqScore, badges, homeCity, homeCountry
+  - following[], followers[], favoriteTeams[]
+  - createdAt, updatedAt
 
 /trips/{tripId}
-  - userId: string
-  - destination: string
-  - matchDate: timestamp
-  - clubId: string
-  - photos: string[]          // Storage URLs
-  - status: 'planning' | 'ongoing' | 'completed'
-  - description: string
-  - createdAt: timestamp
+  - userId, title, description
+  - destinationCity, destinationCountry
+  - matchDate, clubId, opponentClubId
+  - startDate, endDate, status
+  - itinerary[], photos[], companions[]
+  - createdAt, updatedAt
 
 /experiences/{experienceId}
-  - userId: string
-  - tripId: string | null
-  - title: string
-  - description: string
-  - photos: string[]
-  - date: timestamp
-  - createdAt: timestamp
-  - type: 'match' | 'travel' | 'event' | 'personal'
+  - userId, tripId (optional)
+  - title, description, type
+  - location{ lat, lng, address, city, country }
+  - clubId, photos[], tags[], rating
+  - isPublic, likes[], comments[]
+  - createdAt, updatedAt
 
 /clubs/{clubId}
-  - name: string
-  - logo: string              // Storage URL
-  - country: string
-  - stadium: string
-  - fans: string[]             // userIds
-  - description: string
-  - createdAt: timestamp
-
-/posts/{postId}
-  - userId: string
-  - content: string
-  - photos: string[]
-  - likes: string[]            // userIds
-  - comments: Comment[]
-  - type: 'post' | 'trip' | 'experience'
-  - relatedId: string | null   // tripId o experienceId
-  - createdAt: timestamp
-
-/comments/{commentId}
-  - postId: string
-  - userId: string
-  - content: string
-  - createdAt: timestamp
+  - name, shortName, logoUrl, coverImageUrl
+  - description, foundedYear
+  - stadium{ name, address, lat, lng, capacity }
+  - city, country, league, colors[]
+  - fansCount, socialMedia{}
+  - createdAt, updatedAt
 ```
 
 ---
 
 ## 📱 Pantallas
 
-### 1. Home (Feed Social)
-- Feed unificado con posts de usuarios seguidos
-- Posts automáticos cuando alguien crea un viaje o experiencia
-- Likes y comentarios en tiempo real
-- Pull-to-refresh
-
-### 2. Viajes (Mis Viajes)
-- Lista de viajes propios y guardados
-- Crear nuevo viaje: destino, fecha, club, descripción
-- Estados: planning → ongoing → completed
-- Galería de fotos del viaje
-- Compartir viaje como post
-
-### 3. Experiencias (Memorias)
-- Timeline personal de experiencias
-- Galería grid con filtros por fecha/tipo
-- Crear experiencia: título, descripción, fotos, tipo
-- Vinculable a un viaje o independiente
-
-### 4. Clubes
-- Buscar clubes por nombre o país
-- Ver detalle: logo, stadium, descripción, fans
-- Seguir/dejar de seguir clubes
-- Feed del club (posts relacionados)
-
-### 5. Perfil
-- Mi información: nombre, foto, bio
-- Mis viajes y experiencias recientes
-- Estadísticas: viajes, experiencias, clubes seguidos
-- Configuración: editar perfil, notificaciones, cerrar sesión
-
----
-
-## 🎨 Diseño
-
-### Identidad Visual
-- **Nombre:** NA-ONTOUR
-- **Tagline:** "Vive el fútbol, más allá del partido"
-- **Emoji:** 🌍⚽
-
-### Paleta de Colores
-```
-Primary:       #1A5F2A   (Verde campo de fútbol)
-Secondary:     #F4A623   (Dorado/fuego)
-Accent:        #E63946   (Rojo pasión)
-Background:    #FFFFFF
-Surface:       #F8F9FA
-Text Primary:  #212529
-Text Secondary:#6C757D
-```
-
-### Tipografía
-- **Headlines:** Inter Bold
-- **Body:** Inter Regular
-- **Accent:** Space Grotesk
-
-### Iconografía
-- Lucide React (web)
-- @expo/vector-icons (mobile)
-
----
-
-## 📦 Desarrollo
-
-### Requisitos
-- Node.js 18+
-- npm o yarn
-- Firebase CLI (`npm install -g firebase-tools`)
-- Expo CLI (`npm install -g expo-cli`)
-- Cuenta de Firebase (plan Spark o Blaze)
-
-### Setup Local
-
-```bash
-# Clonar repositorio
-git clone https://github.com/PetterAxcell/na-ontour.git
-cd na-ontour
-
-# Instalar dependencias web
-cd web && npm install
-
-# Instalar dependencias mobile
-cd ../mobile && npm install
-
-# Setup Firebase
-firebase login
-firebase init
-```
-
-### Scripts Disponibles
-
-**Web:**
-```bash
-cd web
-npm run dev      # Desarrollo (localhost:5173)
-npm run build    # Build producción
-npm run preview  # Preview build
-```
-
-**Mobile:**
-```bash
-cd mobile
-npx expo start   # Metro bundler
-npx expo run:ios # iOS simulator
-npx expo run:android # Android
-```
-
-### Variables de Entorno
-
-**Web (`web/.env`):**
-```env
-VITE_FIREBASE_API_KEY=tu_api_key
-VITE_FIREBASE_AUTH_DOMAIN=tu_proyecto.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=tu_proyecto
-VITE_FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
-VITE_FIREBASE_APP_ID=tu_app_id
-```
-
-**Mobile (`mobile/app.json` + `.env`):**
-```env
-FIREBASE_API_KEY=tu_api_key
-FIREBASE_AUTH_DOMAIN=tu_proyecto.firebaseapp.com
-FIREBASE_PROJECT_ID=tu_proyecto
-FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
-FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
-FIREBASE_APP_ID=tu_app_id
-```
-
----
-
-## 🚀 Despliegue
-
-### Web (Firebase Hosting)
-```bash
-cd web
-npm run build
-firebase deploy --only hosting
-```
+### Web
+1. **Landing/Auth** - Login, Register
+2. **Home/Dashboard** - Feed, próximo viaje, estadísticas
+3. **Viajes** - Lista, crear, detalle
+4. **Experiencias** - Grid, crear, detalle
+5. **Explorar Clubes** - Lista de clubes, detalle
+6. **Perfil** - Mi perfil, editar, configuración
+7. **Social** - Feed de actividad, descubrir usuarios
 
 ### Mobile (Expo)
+- Mismas pantallas con diseño nativo móvil
+- Bottom tab navigation
+- Native feel & animations
+
+---
+
+## 🚀 Roadmap
+
+### Fase 1: MVP
+- [x] Estructura del proyecto (React + React Native)
+- [x] Configuración Firebase
+- [x] Auth básico (email/password)
+- [x] Modelos de datos
+- [x] CRUD Viajes
+- [x] CRUD Experiencias
+- [ ] CRUD Clubes
+- [ ] Perfil básico
+
+### Fase 2: Social
+- [ ] Follow/Unfollow
+- [ ] Social feed
+- [ ] Likes y comentarios
+- [ ] Descubrir usuarios
+
+### Fase 3: Gamificación
+- [ ] Faniq Score
+- [ ] Badges y logros
+- [ ] Rankings
+
+### Fase 4: Auth Google
+- [ ] Integración Google Sign-In
+- [ ] Vincular cuentas
+
+---
+
+## 📦 Instalación y Desarrollo
+
+### Web
+```bash
+cd web
+npm install
+npm start
+# o
+npm run build  # para producción
+```
+
+### Mobile
 ```bash
 cd mobile
-eas build --platform ios        # Build iOS
-eas build --platform android    # Build Android
-eas submit --platform ios       # Submit a App Store
-eas submit --platform android   # Submit a Play Store
+npm install
+npx expo start
+# Escanea QR con Expo Go
+```
+
+### Backend (Firebase Functions)
+```bash
+cd backend/functions
+npm install
+firebase emulators:start
+# o
+firebase deploy --only functions
 ```
 
 ---
 
-## 🔮 Roadmap
+## 🤝 Contribuir
 
-### v1.0.0 - MVP
-- [x] Estructura del proyecto
-- [x] Auth con email (Firebase)
-- [x] CRUD de viajes
-- [x] CRUD de experiencias
-- [x] Feed social básico
-- [x] Perfil de usuario
-
-### v1.1.0 - Social
-- [ ] Seguir/dejar de seguir usuarios
-- [ ] Likes y comentarios
-- [ ] Notificaciones
-- [ ] Buscar usuarios
-
-### v1.2.0 - Clubes
-- [ ] Catálogo de clubes
-- [ ] Seguir clubes
-- [ ] Feed del club
-- [ ] Experiencias exclusivas
-
-### v2.0.0 - Google Auth + Extras
-- [ ] Login con Google
-- [ ] App en App Store / Play Store
-- [ ] Deep linking
-- [ ] Push notifications
+1. Fork el repositorio
+2. Crea una rama (`git checkout -b feature/nueva-funcion`)
+3. Commit (`git commit -am 'Agrega nueva función'`)
+4. Push (`git push origin feature/nueva-funcion`)
+5. Abre un Pull Request
 
 ---
 
 ## 📄 Licencia
 
-MIT © 2024 NA-ONTOUR
+MIT License
 
 ---
 
-## 👥 Contribuir
-
-1. Fork el repositorio
-2. Crea una rama (`git checkout -b feature/nueva-funcion`)
-3. Commit tus cambios (`git commit -m 'Add nueva función'`)
-4. Push a la rama (`git push origin feature/nueva-funcion`)
-5. Abre un Pull Request
-
----
-
-*Vive el fútbol, más allá del partido.* 🌍⚽
+**NA-ONTOUR** — *Porque cada viaje cuenta.*
