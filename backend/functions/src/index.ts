@@ -1,251 +1,150 @@
-import * as functions from 'firebase-functions'
-import * as admin from 'firebase-admin'
+import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 
-admin.initializeApp()
+admin.initializeApp();
 
-const db = admin.firestore()
+const db = admin.firestore();
 
-/**
- * Triggered when a user creates a new trip.
- * Creates an automatic post in the feed.
- */
-export const onTripCreated = functions.firestore
-  .document('trips/{tripId}')
-  .onCreate(async (snap, context) => {
-    const trip = snap.data()
-    const tripId = context.params.tripId
-
-    if (!trip || !trip.userId) {
-      console.log('No trip data or userId')
-      return null
-    }
-
-    // Get user info
-    const userDoc = await db.collection('users').doc(trip.userId).get()
-    const userName = userDoc.exists ? userDoc.data()?.name || 'Usuario' : 'Usuario'
-
-    // Create a post for the trip
-    await db.collection('posts').add({
-      userId: trip.userId,
-      userName,
-      content: `¡Nuevo viaje creado a ${trip.destination}! 🌍⚽`,
-      photos: trip.photos || [],
-      likes: [],
-      commentsCount: 0,
-      type: 'trip',
-      relatedId: tripId,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    })
-
-    // Update user's trips array
-    await db.collection('users').doc(trip.userId).update({
-      trips: admin.firestore.FieldValue.arrayUnion(tripId)
-    }).catch(() => {
-      // User document might not exist yet
-      console.log('Could not update user trips array')
-    })
-
-    return null
-  })
-
-/**
- * Triggered when a user creates a new experience.
- * Creates an automatic post in the feed.
- */
+// Cloud Function to update Faniq Score when a user creates an experience
 export const onExperienceCreated = functions.firestore
   .document('experiences/{experienceId}')
   .onCreate(async (snap, context) => {
-    const experience = snap.data()
-    const experienceId = context.params.experienceId
+    const experience = snap.data();
+    const userId = experience.userId;
 
-    if (!experience || !experience.userId) {
-      console.log('No experience data or userId')
-      return null
+    try {
+      // Increment user's faniqScore by 10 points
+      await db.collection('users').doc(userId).update({
+        faniqScore: admin.firestore.FieldValue.increment(10),
+        updatedAt: new Date().toISOString()
+      });
+
+      // Check for badges
+      const userDoc = await db.collection('users').doc(userId).get();
+      const userData = userDoc.data();
+      
+      if (userData) {
+        const experiencesCount = await db.collection('experiences')
+          .where('userId', '==', userId)
+          .get();
+
+        // Award badges based on experience count
+        const badges = userData.badges || [];
+        
+        if (experiencesCount.size >= 1 && !badges.includes('first_experience')) {
+          badges.push('first_experience');
+        }
+        if (experiencesCount.size >= 10 && !badges.includes('10_experiences')) {
+          badges.push('10_experiences');
+        }
+        if (experiencesCount.size >= 50 && !badges.includes('50_experiences')) {
+          badges.push('50_experiences');
+        }
+
+        if (badges.length > userData.badges?.length) {
+          await db.collection('users').doc(userId).update({ badges });
+        }
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating faniq score:', error);
+      return { success: false, error };
     }
+  });
 
-    // Get user info
-    const userDoc = await db.collection('users').doc(experience.userId).get()
-    const userName = userDoc.exists ? userDoc.data()?.name || 'Usuario' : 'Usuario'
+// Cloud Function to update Faniq Score when a user creates a trip
+export const onTripCreated = functions.firestore
+  .document('trips/{tripId}')
+  .onCreate(async (snap, context) => {
+    const trip = snap.data();
+    const userId = trip.userId;
 
-    // Create a post for the experience
-    await db.collection('posts').add({
-      userId: experience.userId,
-      userName,
-      content: `Nueva experiencia: ${experience.title} ✨`,
-      photos: experience.photos || [],
-      likes: [],
-      commentsCount: 0,
-      type: 'experience',
-      relatedId: experienceId,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    })
+    try {
+      await db.collection('users').doc(userId).update({
+        faniqScore: admin.firestore.FieldValue.increment(20),
+        updatedAt: new Date().toISOString()
+      });
 
-    // Update user's experiences array
-    await db.collection('users').doc(experience.userId).update({
-      experiences: admin.firestore.FieldValue.arrayUnion(experienceId)
-    }).catch(() => {
-      console.log('Could not update user experiences array')
-    })
+      // Check for trip badges
+      const tripsCount = await db.collection('trips')
+        .where('userId', '==', userId)
+        .get();
 
-    return null
-  })
+      const userDoc = await db.collection('users').doc(userId).get();
+      const userData = userDoc.data();
+      const badges = userData?.badges || [];
 
-/**
- * HTTP function to follow a user.
- */
-export const followUser = functions.https.onCall(async (data, context) => {
+      if (tripsCount.size >= 1 && !badges.includes('first_trip')) {
+        badges.push('first_trip');
+      }
+      if (tripsCount.size >= 5 && !badges.includes('5_trips')) {
+        badges.push('5_trips');
+      }
+
+      if (badges.length > userData?.badges?.length) {
+        await db.collection('users').doc(userId).update({ badges });
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating faniq score:', error);
+      return { success: false, error };
+    }
+  });
+
+// Cloud Function to update club fans count
+export const onUserFollowClub = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated')
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
 
-  const { targetUserId } = data
-  const currentUserId = context.auth.uid
+  const { clubId, action } = data;
+  const userId = context.auth.uid;
 
-  if (!targetUserId) {
-    throw new functions.https.HttpsError('invalid-argument', 'targetUserId is required')
+  if (action === 'follow') {
+    await db.collection('users').doc(userId).update({
+      favoriteTeams: admin.firestore.FieldValue.arrayUnion(clubId)
+    });
+    await db.collection('clubs').doc(clubId).update({
+      fansCount: admin.firestore.FieldValue.increment(1)
+    });
+  } else if (action === 'unfollow') {
+    await db.collection('users').doc(userId).update({
+      favoriteTeams: admin.firestore.FieldValue.arrayRemove(clubId)
+    });
+    await db.collection('clubs').doc(clubId).update({
+      fansCount: admin.firestore.FieldValue.increment(-1)
+    });
   }
 
-  if (currentUserId === targetUserId) {
-    throw new functions.https.HttpsError('invalid-argument', 'Cannot follow yourself')
-  }
+  return { success: true };
+});
 
-  const batch = db.batch()
-
-  // Add target user to current user's following
-  batch.update(db.collection('users').doc(currentUserId), {
-    following: admin.firestore.FieldValue.arrayUnion(targetUserId)
-  })
-
-  // Add current user to target user's followers
-  batch.update(db.collection('users').doc(targetUserId), {
-    followers: admin.firestore.FieldValue.arrayUnion(currentUserId)
-  })
-
-  await batch.commit()
-
-  return { success: true }
-})
-
-/**
- * HTTP function to unfollow a user.
- */
-export const unfollowUser = functions.https.onCall(async (data, context) => {
+// Cloud Function to update followers/following
+export const onFollowUser = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated')
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
   }
 
-  const { targetUserId } = data
-  const currentUserId = context.auth.uid
+  const { targetUserId, action } = data;
+  const currentUserId = context.auth.uid;
 
-  if (!targetUserId) {
-    throw new functions.https.HttpsError('invalid-argument', 'targetUserId is required')
+  if (action === 'follow') {
+    await db.collection('users').doc(currentUserId).update({
+      following: admin.firestore.FieldValue.arrayUnion(targetUserId)
+    });
+    await db.collection('users').doc(targetUserId).update({
+      followers: admin.firestore.FieldValue.arrayUnion(currentUserId)
+    });
+  } else if (action === 'unfollow') {
+    await db.collection('users').doc(currentUserId).update({
+      following: admin.firestore.FieldValue.arrayRemove(targetUserId)
+    });
+    await db.collection('users').doc(targetUserId).update({
+      followers: admin.firestore.FieldValue.arrayRemove(currentUserId)
+    });
   }
 
-  const batch = db.batch()
-
-  // Remove target user from current user's following
-  batch.update(db.collection('users').doc(currentUserId), {
-    following: admin.firestore.FieldValue.arrayRemove(targetUserId)
-  })
-
-  // Remove current user from target user's followers
-  batch.update(db.collection('users').doc(targetUserId), {
-    followers: admin.firestore.FieldValue.arrayRemove(currentUserId)
-  })
-
-  await batch.commit()
-
-  return { success: true }
-})
-
-/**
- * HTTP function to like a post.
- */
-export const likePost = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated')
-  }
-
-  const { postId } = data
-  const userId = context.auth.uid
-
-  if (!postId) {
-    throw new functions.https.HttpsError('invalid-argument', 'postId is required')
-  }
-
-  await db.collection('posts').doc(postId).update({
-    likes: admin.firestore.FieldValue.arrayUnion(userId)
-  })
-
-  return { success: true }
-})
-
-/**
- * HTTP function to unlike a post.
- */
-export const unlikePost = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated')
-  }
-
-  const { postId } = data
-  const userId = context.auth.uid
-
-  if (!postId) {
-    throw new functions.https.HttpsError('invalid-argument', 'postId is required')
-  }
-
-  await db.collection('posts').doc(postId).update({
-    likes: admin.firestore.FieldValue.arrayRemove(userId)
-  })
-
-  return { success: true }
-})
-
-/**
- * HTTP function to add a comment to a post.
- */
-export const addComment = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated')
-  }
-
-  const { postId, content } = data
-  const userId = context.auth.uid
-
-  if (!postId || !content) {
-    throw new functions.https.HttpsError('invalid-argument', 'postId and content are required')
-  }
-
-  // Get user name
-  const userDoc = await db.collection('users').doc(userId).get()
-  const userName = userDoc.exists ? userDoc.data()?.name || 'Usuario' : 'Usuario'
-
-  // Add comment to subcollection
-  const commentRef = await db.collection('posts').doc(postId).collection('comments').add({
-    userId,
-    userName,
-    content,
-    createdAt: admin.firestore.FieldValue.serverTimestamp()
-  })
-
-  // Increment comments count on post
-  await db.collection('posts').doc(postId).update({
-    commentsCount: admin.firestore.FieldValue.increment(1)
-  })
-
-  return { success: true, commentId: commentRef.id }
-})
-
-/**
- * Scheduled function to clean up old data (runs daily).
- */
-export const dailyCleanup = functions.pubsub
-  .schedule('every 24 hours')
-  .onRun(async () => {
-    console.log('Daily cleanup running...')
-    // TODO: Implement cleanup logic for old/temp data
-    return null
-  })
+  return { success: true };
+}));

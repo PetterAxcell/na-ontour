@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow delete: if false; // Users cannot delete their documents
+    }
+    
+    // Trips collection
+    match /trips/{tripId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+        (resource.data.userId == request.auth.uid || 
+         request.auth.uid in resource.data.companions);
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Experiences collection
+    match /experiences/{experienceId} {
+      allow read: if isAuthenticated() && 
+        (resource.data.isPublic == true || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated();
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Clubs collection
+    match /clubs/{clubId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if false; // Only admin can modify clubs
+    }
+  }
+}

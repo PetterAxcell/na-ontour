@@ -1,70 +1,47 @@
 # Dependencies
 node_modules/
-.pnp
-.pnp.js
+.pubsub/
+.dart_tool/
+.packages
+.pub-cache/
 
 # Build outputs
-dist/
-build/
-.webpack/
-*.egg-info/
+web/build/
+mobile/.expo/
+mobile/dist/
+backend/functions/lib/
 
-# Expo
-.expo/
-dist/
-web-build/
-
-# Firebase
-.firebase/
-firebase-debug.log*
-
-# Environment variables
+# Environment
 .env
 .env.local
 .env.*.local
-*.env
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# macOS
-.DS_Store
-*.pem
 
 # IDE
 .idea/
 .vscode/
-*.swp
-*.swo
-*~
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Logs
-logs/
 *.log
+npm-debug.log*
 
 # Testing
 coverage/
 
-# Mobile build artifacts
-*.orig.*
-android/app/build/
-ios/Pods/
-ios/build/
+# Mobile
+*.ipa
+*.apk
+*.aab
 
-# EAS
-.eas/
+# Assets (except placeholders)
+mobile/assets/icon.png
+mobile/assets/splash.png
+mobile/assets/adaptive-icon.png
+mobile/assets/favicon.png
 
-# TypeScript
-*.tsbuildinfo
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-
-# Secrets (NEVER commit these)
-*.keystore
-*.p12
-service-account.json
+# Firebase
+.firebase/
