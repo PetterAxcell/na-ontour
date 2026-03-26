@@ -2,6 +2,12 @@
 
 > **Compite viajando. Recuerda experiencias. Conecta clubes y aficionados.**
 
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactjs.org/)
+[![React Native](https://img.shields.io/badge/React_Native-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactnative.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Expo](https://img.shields.io/badge/Expo-000020?style=flat-square&logo=expo&logoColor=white)](https://expo.dev/)
+
 ---
 
 ## 🎯 Visión
@@ -49,44 +55,40 @@ Imagina que tu equipo juega en una ciudad que nunca has visitado. NA-ONTOUR te a
 
 ## 🏗️ Arquitectura
 
-### Stack Tecnológico
-
-**Web (React)**
 ```
-web/
-├── public/
-├── src/
-│   ├── components/       # Componentes reutilizables
-│   ├── screens/          # Páginas/Vistas
-│   ├── context/          # React Context (Auth, Theme)
-│   ├── services/         # Firebase, API calls
-│   └── styles/           # CSS/Estilos
-├── package.json
-└── firebase.json
-```
-
-**Mobile (React Native + Expo)**
-```
-mobile/
-├── app.json
-├── src/
-│   ├── components/       # Componentes reutilizables
-│   ├── screens/          # Pantallas
-│   ├── context/          # React Context
-│   ├── services/         # Firebase, API
-│   └── hooks/            # Custom hooks
-├── package.json
-└── App.tsx
-```
-
-**Backend (Firebase Functions)**
-```
-backend/
-└── functions/
-    ├── src/
-    │   ├── index.ts
-    │   └── ... (Cloud Functions)
-    └── package.json
+na-ontour/
+├── web/                    # React SPA (Vite + TypeScript)
+│   ├── src/
+│   │   ├── components/     # Componentes reutilizables
+│   │   ├── screens/        # Páginas/Vistas
+│   │   ├── contexts/       # React Context (Auth)
+│   │   ├── services/       # Firebase services
+│   │   ├── utils/          # Firebase config
+│   │   ├── types/          # TypeScript types
+│   │   └── hooks/          # Custom hooks
+│   └── public/
+│
+├── mobile/                 # React Native + Expo
+│   ├── src/
+│   │   ├── screens/        # Pantallas
+│   │   ├── components/     # Componentes
+│   │   ├── services/       # Firebase services
+│   │   ├── context/        # Auth context
+│   │   └── navigation/     # React Navigation
+│   └── assets/
+│
+├── backend/
+│   └── functions/          # Firebase Cloud Functions
+│       └── src/
+│
+├── docs/                   # Documentación técnica
+│   ├── SPEC.md            # Especificación completa
+│   ├── MOCKUPS.md         # Wireframes y mockups
+│   └── TECNICA.md         # Documentación técnica
+│
+├── firebase.json           # Firebase config
+├── firestore.rules         # Reglas de Firestore
+└── storage.rules           # Reglas de Storage
 ```
 
 ---
@@ -94,19 +96,170 @@ backend/
 ## 🔥 Firebase Setup
 
 ### Servicios utilizados:
-- **Firebase Auth**: Autenticación (Google将来)
+- **Firebase Auth**: Autenticación (Email + Google)
 - **Firestore**: Base de datos NoSQL
 - **Firebase Storage**: Almacenamiento de imágenes
 - **Firebase Hosting**: Hosting para web
 - **Expo**: Despliegue móvil
 
-### Estructura Firestore:
+---
+
+## 🚀 Setup y Desarrollo
+
+### Prerrequisitos
+- Node.js 18+
+- npm o yarn
+- Cuenta de Firebase (gratuita en [Firebase Console](https://console.firebase.google.com/))
+- Expo CLI (`npm install -g expo-cli`)
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/PetterAxcell/na-ontour.git
+cd na-ontour
+```
+
+### 2. Crear proyecto Firebase
+
+1. Ve a [Firebase Console](https://console.firebase.google.com/)
+2. Crea un nuevo proyecto
+3. Habilita **Authentication** → Email/Password y Google
+4. Habilita **Firestore Database** → Crea en modo producción
+5. Habilita **Storage** → Crea en modo producción
+6. Registra tu app web en Configuración del proyecto
+
+### 3. Configurar variables de entorno
+
+**Web (`web/.env`):**
+```env
+VITE_FIREBASE_API_KEY=tu-api-key
+VITE_FIREBASE_AUTH_DOMAIN=tu-proyecto.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=tu-proyecto-id
+VITE_FIREBASE_STORAGE_BUCKET=tu-proyecto.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abc123
+```
+
+**Mobile (`mobile/app.json` o `app.config.ts`):**
+```json
+{
+  "extra": {
+    "firebaseApiKey": "tu-api-key",
+    "firebaseAuthDomain": "tu-proyecto.firebaseapp.com",
+    "firebaseProjectId": "tu-proyecto-id",
+    "firebaseStorageBucket": "tu-proyecto.appspot.com",
+    "firebaseMessagingSenderId": "123456789",
+    "firebaseAppId": "1:123456789:android:abc123"
+  }
+}
+```
+
+### 4. Instalar dependencias
+
+```bash
+# Web
+cd web
+npm install
+
+# Mobile
+cd ../mobile
+npm install
+
+# Backend (Functions)
+cd ../backend/functions
+npm install
+```
+
+### 5. Ejecutar en desarrollo
+
+```bash
+# Web
+cd web
+npm run dev
+# Abre http://localhost:5173
+
+# Mobile
+cd mobile
+npx expo start
+# Escanea QR con Expo Go (Android) o Camera (iOS)
+
+# Backend (Emuladores)
+cd backend/functions
+npm run serve
+```
+
+---
+
+## 📱 Despliegue
+
+### Web (Firebase Hosting)
+
+```bash
+cd web
+npm run build
+firebase deploy --only hosting
+```
+
+### Mobile (Expo EAS)
+
+```bash
+cd mobile
+
+# Build para iOS (requiere cuenta de Apple Developer)
+eas build --platform ios
+
+# Build para Android
+eas build --platform android
+
+# Submit a tiendas
+eas submit --platform ios
+eas submit --platform android
+```
+
+### Backend (Firebase Functions)
+
+```bash
+cd backend/functions
+firebase deploy --only functions
+```
+
+---
+
+## 🔧 Scripts Disponibles
+
+### Web
+| Script | Descripción |
+|--------|-------------|
+| `npm run dev` | Inicia servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm run preview` | Previsualiza build de producción |
+| `npm run lint` | Linting con ESLint |
+
+### Mobile
+| Script | Descripción |
+|--------|-------------|
+| `npx expo start` | Inicia Expo |
+| `npx expo run:ios` | Ejecuta en iOS |
+| `npx expo run:android` | Ejecuta en Android |
+| `eas build` | Build con EAS |
+
+### Backend
+| Script | Descripción |
+|--------|-------------|
+| `npm run serve` | Inicia emuladores locales |
+| `npm run shell` | Inicia shell de functions |
+| `npm run deploy` | Despliega a producción |
+| `npm run logs` | Ver logs de functions |
+
+---
+
+## 📂 Estructura de Datos (Firestore)
 
 ```
 /users/{userId}
-  - email, username, displayName, avatarUrl, bio
-  - faniqScore, badges, homeCity, homeCountry
-  - following[], followers[], favoriteTeams[]
+  - email, name, photoURL, bio
+  - faniqScore, badges, favoriteTeams
+  - trips[], experiences[], following[], followers[]
   - createdAt, updatedAt
 
 /trips/{tripId}
@@ -119,97 +272,42 @@ backend/
 
 /experiences/{experienceId}
   - userId, tripId (optional)
-  - title, description, type
-  - location{ lat, lng, address, city, country }
+  - title, description, location
   - clubId, photos[], tags[], rating
-  - isPublic, likes[], comments[]
+  - type: 'match' | 'travel' | 'event' | 'personal'
+  - isPublic, likes[]
   - createdAt, updatedAt
 
 /clubs/{clubId}
-  - name, shortName, logoUrl, coverImageUrl
+  - name, shortName, logo, coverImage
   - description, foundedYear
   - stadium{ name, address, lat, lng, capacity }
   - city, country, league, colors[]
-  - fansCount, socialMedia{}
+  - fans[], socialMedia{}
+  - createdAt, updatedAt
+
+/posts/{postId}
+  - userId, content, photos[]
+  - likes[], commentsCount
+  - type: 'post' | 'trip' | 'experience' | 'club'
+  - relatedId
   - createdAt, updatedAt
 ```
 
 ---
 
-## 📱 Pantallas
+## 🎨 Paleta de Colores
 
-### Web
-1. **Landing/Auth** - Login, Register
-2. **Home/Dashboard** - Feed, próximo viaje, estadísticas
-3. **Viajes** - Lista, crear, detalle
-4. **Experiencias** - Grid, crear, detalle
-5. **Explorar Clubes** - Lista de clubes, detalle
-6. **Perfil** - Mi perfil, editar, configuración
-7. **Social** - Feed de actividad, descubrir usuarios
-
-### Mobile (Expo)
-- Mismas pantallas con diseño nativo móvil
-- Bottom tab navigation
-- Native feel & animations
-
----
-
-## 🚀 Roadmap
-
-### Fase 1: MVP
-- [x] Estructura del proyecto (React + React Native)
-- [x] Configuración Firebase
-- [x] Auth básico (email/password)
-- [x] Modelos de datos
-- [x] CRUD Viajes
-- [x] CRUD Experiencias
-- [ ] CRUD Clubes
-- [ ] Perfil básico
-
-### Fase 2: Social
-- [ ] Follow/Unfollow
-- [ ] Social feed
-- [ ] Likes y comentarios
-- [ ] Descubrir usuarios
-
-### Fase 3: Gamificación
-- [ ] Faniq Score
-- [ ] Badges y logros
-- [ ] Rankings
-
-### Fase 4: Auth Google
-- [ ] Integración Google Sign-In
-- [ ] Vincular cuentas
-
----
-
-## 📦 Instalación y Desarrollo
-
-### Web
-```bash
-cd web
-npm install
-npm start
-# o
-npm run build  # para producción
-```
-
-### Mobile
-```bash
-cd mobile
-npm install
-npx expo start
-# Escanea QR con Expo Go
-```
-
-### Backend (Firebase Functions)
-```bash
-cd backend/functions
-npm install
-firebase emulators:start
-# o
-firebase deploy --only functions
-```
+| Color | Hex | Uso |
+|-------|-----|-----|
+| Primary | `#1A5F2A` | Verde campo de fútbol |
+| Primary Light | `#2D8A42` | Hover states |
+| Secondary | `#F4A623` | Dorado/fuego |
+| Accent | `#E63946` | Rojo pasión |
+| Background | `#FFFFFF` | Fondo principal |
+| Surface | `#F8F9FA` | Cards, contenedores |
+| Text | `#212529` | Texto principal |
+| Text Secondary | `#6C757D` | Texto secundario |
 
 ---
 

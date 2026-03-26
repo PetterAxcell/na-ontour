@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { User } from 'firebase/auth'
-import { doc, onSnapshot } from 'firebase/firestore'
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore'
 import { db, auth } from '../utils/firebase'
 import { User as AppUser } from '../types'
 
@@ -32,6 +32,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user) {
         // Listen to user document in Firestore
         const userRef = doc(db, 'users', user.uid)
+        
+        // Ensure user document exists (for users created before Firestore integration)
+        const userSnap = await getDoc(userRef)
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            name: user.displayName || 'Usuario NA-ONTOUR',
+            email: user.email,
+            photoURL: user.photoURL,
+            bio: '',
+            homeCity: '',
+            homeCountry: '',
+            faniqScore: 0,
+            badges: [],
+            favoriteTeams: [],
+            trips: [],
+            experiences: [],
+            following: [],
+            followers: [],
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          })
+        }
+        
         const unsubscribeSnapshot = onSnapshot(userRef, (doc) => {
           if (doc.exists()) {
             setUserData({ id: doc.id, ...doc.data() } as AppUser)

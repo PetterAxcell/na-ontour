@@ -89,7 +89,7 @@ export default function TripsScreen() {
       {filteredTrips.length === 0 ? (
         <div className={styles.empty}>
           <span className={styles.emptyIcon}>✈️</span>
-          <h3>No hay viajes {filter !== 'all' && filter !== 'all' ? statusLabels[filter].toLowerCase() : ''}</h3>
+          <h3>No hay viajes {filter !== 'all' ? statusLabels[filter as keyof typeof statusLabels].toLowerCase() : ''}</h3>
           <p>Crea tu primer viaje a un partido de fútbol.</p>
           <Link to="/viajes/nuevo" className={styles.emptyBtn}>
             Crear viaje

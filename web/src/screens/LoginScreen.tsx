@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../utils/firebase'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { auth, db } from '../utils/firebase'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react'
 import styles from './LoginScreen.module.css'
@@ -24,7 +25,29 @@ export default function LoginScreen() {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password)
       } else {
-        await createUserWithEmailAndPassword(auth, email, password)
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+        
+        // Update display name
+        await updateProfile(userCredential.user, { displayName: name })
+        
+        // Create user document in Firestore
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          name,
+          email: userCredential.user.email,
+          photoURL: null,
+          bio: '',
+          homeCity: '',
+          homeCountry: '',
+          faniqScore: 0,
+          badges: [],
+          favoriteTeams: [],
+          trips: [],
+          experiences: [],
+          following: [],
+          followers: [],
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        })
       }
       navigate('/')
     } catch (err: any) {
